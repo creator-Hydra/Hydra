@@ -1,0 +1,41 @@
+name: Crear APK de Hydra
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar proyecto
+        uses: actions/checkout@v4
+
+      - name: Preparar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Preparar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      - name: Descomprimir Hydra
+        run: |
+          mkdir proyecto
+          unzip -q *.zip -d proyecto
+          echo "Contenido:"
+          find proyecto -maxdepth 3 -type f | head -50
+
+      - name: Compilar APK
+        run: |
+          cd proyecto/HydraAndroid
+          gradle :app:assembleDebug
+
+      - name: Guardar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hydra-APK
+          path: proyecto/HydraAndroid/app/build/outputs/apk/debug/app-debug.apk
